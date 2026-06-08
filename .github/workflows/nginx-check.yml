@@ -2,7 +2,7 @@ name: Nginx External Check
 
 on:
   schedule:
-    - cron: '24 13 * * *'
+    - cron: '30 13 * * *'
   workflow_dispatch:
 
 jobs:
