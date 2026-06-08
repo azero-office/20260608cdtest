@@ -1,0 +1,66 @@
+name: Nginx External Check
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check-nginx:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Nginx Website
+        env:
+          TARGET_URL: "http://13.209.50.127"
+          TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
+        run: |
+          echo "Checking $TARGET_URL"
+
+          if curl -fsS --max-time 10 "$TARGET_URL" > /dev/null; then
+            STATUS="✅ Nginx 정상 동작"
+            COLOR="Good"
+          else
+            STATUS="🚨 Nginx 접속 실패"
+            COLOR="Attention"
+          fi
+
+          curl -X POST "$TEAMS_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"type\":\"message\",
+              \"attachments\":[
+                {
+                  \"contentType\":\"application/vnd.microsoft.card.adaptive\",
+                  \"content\":{
+                    \"type\":\"AdaptiveCard\",
+                    \"version\":\"1.4\",
+                    \"body\":[
+                      {
+                        \"type\":\"TextBlock\",
+                        \"size\":\"Large\",
+                        \"weight\":\"Bolder\",
+                        \"text\":\"GitHub Actions 서버 점검\"
+                      },
+                      {
+                        \"type\":\"TextBlock\",
+                        \"text\":\"$STATUS\",
+                        \"color\":\"$COLOR\"
+                      },
+                      {
+                        \"type\":\"TextBlock\",
+                        \"text\":\"URL: $TARGET_URL\"
+                      },
+                      {
+                        \"type\":\"TextBlock\",
+                        \"text\":\"시간: $(date -u '+%Y-%m-%d %H:%M:%S UTC')\"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }"
+
+          if [ "$COLOR" = "Attention" ]; then
+            exit 1
+          fi
