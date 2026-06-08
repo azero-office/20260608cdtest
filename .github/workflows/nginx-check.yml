@@ -40,7 +40,7 @@ jobs:
                         \"type\":\"TextBlock\",
                         \"size\":\"Large\",
                         \"weight\":\"Bolder\",
-                        \"text\":\"GitHub Actions 서버 점검\"
+                        \"text\":\"GitHub Actions 테스트\"
                       },
                       {
                         \"type\":\"TextBlock\",
